@@ -54,6 +54,9 @@ class Card:
     
     def value(self):
         return int(self.pointValue)
+     
+    def strength(self):
+        return int(self.strength)
     
 class Deck:
     def __init__(self, num_decks=3) -> None:
@@ -91,7 +94,7 @@ class Deck:
             return self.cards.pop()
         else:
             print("All cards dealt") 
-    
+
     def __repr__(self) -> str:
         """`deck` returns card string"""
         return ' '.join(str(card) for card in self.cards)
@@ -101,7 +104,37 @@ class Deck:
         """`deck.cards` returns list of card strings"""
         return ', '.join(str(card) for card in self.cards)
 
+class Player:
+    def __init__(self, name="") -> None:
+        self.cards = []
+        self.name = name
+    
+    def add_card_to_hand(self, card):
+        if type(card) == str:
+            self.cards.append(card)
+        elif type(card) == list:
+            self.cards.extend(card)
+        else:
+            print(f"add_card_to_hand failure - type {type(card)}")
+    
+    # NOTE Should this be split into self.cards.play and self.cards.discard?
+    def remove_card_from_hand(self, card):
+        return self.cards.pop(card) 
+
+    def play_card(self, card):
+        #TODO Figure out table space
+        pass
+
 if __name__ == "__main__":
     #print(rules)
     deck = Deck()
-    deck.shuffle()
+    #deck.shuffle()
+
+
+# TODO: ensure suit is followed
+# TODO: ensure higher card is played if one is available
+# TODO: check winning card
+# TODO: 
+# TODO: 
+# TODO: 
+# TODO: 
