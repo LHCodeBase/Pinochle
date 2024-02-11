@@ -112,6 +112,9 @@ class Deck:
         """`deck.cards` returns list of card strings"""
         return ', '.join(str(card) for card in self.cards)
 
+    def __len__(self) -> int:
+        return len(self.cards)
+
 class Player:
     def __init__(self, name="") -> None:
         self.hand = []
