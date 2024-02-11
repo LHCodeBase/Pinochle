@@ -58,6 +58,12 @@ class Card:
     def strength(self):
         return int(self.strength)
     
+# TODO: Make deck part of Game class and initialize on start.
+# TODO: Make shuffle part of a new hand method.
+class Game:
+    def __init__(self) -> None:
+        pass
+
 class Deck:
     def __init__(self, num_decks=3) -> None:
         self.num_decks = num_decks
@@ -77,6 +83,7 @@ class Deck:
                     pointValue = pointValues[denomination]
                     self.cards.append(Card(suit, denomination, strength, pointValue))
 
+    # Note that this doesn't reset the deck
     def shuffle(self):
         random.shuffle(self.cards)
     
@@ -86,6 +93,7 @@ class Deck:
             return self.cards.pop()
         else:
             print("Cards are dealt, 4 left in the kitty.")
+            return None
     
     def deal_kitty(self):
         if len(self.cards) > 4:
@@ -106,14 +114,19 @@ class Deck:
 
 class Player:
     def __init__(self, name="") -> None:
-        self.cards = []
+        self.hand = []
         self.name = name
+
+    # NOTE:
+    # Can use p1 = 'Player 1'
+    # p1 = Player(p1)
+    # p1.name >>> 'Player 1'
     
     def add_card_to_hand(self, card):
-        if type(card) == str:
-            self.cards.append(card)
-        elif type(card) == list:
-            self.cards.extend(card)
+        if isinstance(card, Card):
+            self.hand.append(card)
+        elif isinstance(card, list):
+            self.hand.extend(card)
         else:
             print(f"add_card_to_hand failure - type {type(card)}")
     
@@ -138,3 +151,10 @@ if __name__ == "__main__":
 # TODO: 
 # TODO: 
 # TODO: 
+
+# NOTE TESTING
+p1 = Player('Player 1')
+p2 = Player('Player 2')
+p3 = Player('Player 3')
+p4 = Player('Player 4')
+players = [p1, p2, p3, p4]
