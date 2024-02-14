@@ -39,6 +39,30 @@ rules = """
      that won the bid wins the game.
     """
 
+meld_rules = """
+    run      	    A-10-K-Q-J of trump 	                        15
+    aces 	        four aces, one of each suit 	                10
+    kings       	four kings, one of each suit 	                8
+    queens 	        four queens, one of each suit 	                6
+    jacks 	        four jacks, one of each suit 	                4
+    pinochle     	queen of spades and jack of diamonds 	        4
+    royal marriage 	K-Q of trump (unless in a run)* 	            4
+    common marriage	K-Q of nontrump suit                            2
+    dix 	        9 of trump 	                                    1
+    double run 	    both sequences A-10-K-Q-J of trump 	            150
+    double aces 	two aces of every suit                        	100
+    double kings 	two kings of every suit                        	80
+    double queens 	two queens of every suit                        60
+    double jacks 	two jacks of every suit                         40
+    double pinochle	two queens of spades and jacks of diamonds 	    30 
+    triple aces 	three aces of every suit                       	100
+    triple kings 	three kings of every suit                      	80
+    triple queens 	three queens of every suit                      60
+    triple jacks 	three jacks of every suit                       40
+    triple pinochle	three queens of spades and jacks of diamonds 	30 
+    # NOTE that a run should not also include to points of a marriage
+"""
+
 class Card:
     def __init__(self, suit, denomination, strength, pointValue) -> None:
         self.suit = suit
