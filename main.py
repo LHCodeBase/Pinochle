@@ -119,6 +119,9 @@ class Player:
     def __init__(self, name="") -> None:
         self.hand = []
         self.name = name
+    
+    def __repr__(self) -> str:
+        return self.name
 
     # NOTE:
     # Can use p1 = 'Player 1'
