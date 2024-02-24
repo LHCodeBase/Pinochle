@@ -56,8 +56,7 @@ class Card:
         return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
 
     def __repr__(self) -> str:
-        terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
-        return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
+        return f"{self.denomination}{self.suit}"
     
     def value(self):
         return int(self.pointValue)
