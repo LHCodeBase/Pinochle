@@ -52,17 +52,23 @@ class Card:
         self.pointValue = pointValue
 
     def __str__(self) -> str:
-        terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
+        terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else \
+                ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
         return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
 
     def __repr__(self) -> str:
-        return f"{self.denomination}{self.suit}"
+        terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else \
+                ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
+        return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
     
     def value(self):
         return int(self.pointValue)
      
     def strength(self):
         return int(self.strength)
+
+    def calculate_suit_value():
+        pass
     
 # TODO: Make deck part of Game class and initialize on start.
 # TODO: Make shuffle part of a new hand method.
@@ -72,6 +78,9 @@ class Game:
         self.players = [Player(f'Player {i+1}') for i in range(num_players)]
         self.current_bid = 41
         self.kitty = []
+        self.trump_suit = None
+        self.lead_suit = None
+        self.dealer_button = self.players[0]
 
 
     def play(self):
@@ -84,6 +93,13 @@ class Game:
                 player.hand.append(self.deck.cards.pop(0))
         self.kitty.extend(\
             [self.deck.cards.pop(0) for i in range(len(self.deck.cards))])
+
+    def change_dealer(self, current_dealer):
+        current_dealer_index = players.index(current_dealer)
+        if players[current_dealer_index] != players[-1]:
+            self.dealer_button = players[current_dealer_index+1]
+        else:
+            self.dealer_button = players[0]
 
 class Deck:
     def __init__(self, num_decks=3) -> None:
