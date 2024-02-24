@@ -39,6 +39,11 @@ rules = """
      that won the bid wins the game.
     """
 
+def get_player_count():
+    keep_going = [str(range(4))]
+    num_players = input('How many players? Press \'q\' to (q)uit' )
+    #match
+
 class Card:
     def __init__(self, suit, denomination, strength, pointValue) -> None:
         self.suit = suit
@@ -47,10 +52,12 @@ class Card:
         self.pointValue = pointValue
 
     def __str__(self) -> str:
-        return f"{self.denomination}{self.suit}"
+        terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
+        return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
 
     def __repr__(self) -> str:
-        return f"{self.denomination}{self.suit}"
+        terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
+        return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
     
     def value(self):
         return int(self.pointValue)
@@ -61,8 +68,23 @@ class Card:
 # TODO: Make deck part of Game class and initialize on start.
 # TODO: Make shuffle part of a new hand method.
 class Game:
-    def __init__(self) -> None:
+    def __init__(self, num_players=4) -> None:
+        self.deck = Deck()
+        self.players = [Player(f'Player {i+1}') for i in range(num_players)]
+        self.current_bid = 41
+        self.kitty = []
+
+
+    def play(self):
         pass
+
+    def deal(self):
+        self.deck.shuffle()
+        while len(self.deck.cards) > 4:
+            for player in players:
+                player.hand.append(self.deck.cards.pop(0))
+        self.kitty.extend(\
+            [self.deck.cards.pop(0) for i in range(len(self.deck.cards))])
 
 class Deck:
     def __init__(self, num_decks=3) -> None:
@@ -71,7 +93,7 @@ class Deck:
         self.create_deck()
     
     def create_deck(self):
-        suits = ["♣", "♢", "♡", "♠"] # Digraph is cC cD cH cS
+        suits = ["♣", "♦", "♥", "♠"] # Digraph is cC cD cH cS
         # TODO Add terminal colors - red and black - with background white
         denominations = ["9", "J", "Q", "K", "T", "A"] # NOTE used T instead of 10
         strengths = {"9":0, "J":1, "Q":2, "K":3, "T":4, "A":5}
@@ -85,10 +107,13 @@ class Deck:
 
     # Note that this doesn't reset the deck
     def shuffle(self):
-        random.shuffle(self.cards)
+        for t in range(5):
+            random.shuffle(self.cards)
+    
     
     def deal_card(self):
         #TODO Make deal stop with 4 cards without messing things up
+
         if len(self.cards) > 4:
             return self.cards.pop()
         else:
@@ -102,6 +127,19 @@ class Deck:
             return self.cards.pop()
         else:
             print("All cards dealt") 
+
+#def spades_high(card):
+#    rank_value = FrenchDeck.ranks.index(card.rank) #returns rank index, not rank
+#    return rank_value * len(suit_values) + suit_values[card.suit]
+    # First entry is Card(rank='2', suit='clubs')
+    # index of 2 is 0.  0 * 4 = 0. suit_values['clubs'] = 0
+    # this puts it at sorting 0
+
+#for card in sorted(deck, key=spades_high):
+#    print(card)
+#                                       OR
+#pprint(sorted(deck, key=spades_high))
+
 
     def __repr__(self) -> str:
         """`deck` returns card string"""
@@ -147,7 +185,7 @@ class Player:
 if __name__ == "__main__":
     #print(rules)
     deck = Deck()
-    #deck.shuffle()
+    game = Game()
 
 
 # TODO: ensure suit is followed
