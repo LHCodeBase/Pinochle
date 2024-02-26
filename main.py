@@ -52,11 +52,15 @@ class Card:
         self.pointValue = pointValue
 
     def __str__(self) -> str:
+        # NOTE ANSI escape char (\033) does NOT count towards string length
         terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else \
                 ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
         return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
+        # str(Card)[10:12] gives the denomination and suit as one string
+        # `d, s = str(Card)[10:12]` gives the denomination and suit seperately
 
     def __repr__(self) -> str:
+        # NOTE ANSI escape char (\033) does NOT count towards string length
         terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else \
                 ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
         return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
@@ -67,8 +71,21 @@ class Card:
     def strength(self):
         return int(self.strength)
 
-    def calculate_suit_value():
+    def suit(self):
+        return self.suit
+
+    def calculate_suit_value(self):
+        _denominations_value = {value: index+1 for index, value in \
+                enumerate(Deck.denominations)}
+        _temp_suits = Deck.suits.copy()
+        _suits_value.insert(Deck.suits.copy())
         pass
+
+    def __lt__(self, other):
+        #return str(self) > str(other)
+        return str(Deck.suits.index(self.suit)) + str(self.strength) <  \
+                str(Deck.suits.index(other.suit)) + str(other.strength)
+
     
 # TODO: Make deck part of Game class and initialize on start.
 # TODO: Make shuffle part of a new hand method.
@@ -102,20 +119,21 @@ class Game:
             self.dealer_button = players[0]
 
 class Deck:
+    denominations = ["9", "J", "Q", "K", "T", "A"] # NOTE used T for 10
+    suits = ["♠", "♥", "♦", "♣"] # Digraph is cC cD cH cS
+
     def __init__(self, num_decks=3) -> None:
         self.num_decks = num_decks
         self.cards = []
         self.create_deck()
     
     def create_deck(self):
-        suits = ["♣", "♦", "♥", "♠"] # Digraph is cC cD cH cS
         # TODO Add terminal colors - red and black - with background white
-        denominations = ["9", "J", "Q", "K", "T", "A"] # NOTE used T instead of 10
         strengths = {"9":0, "J":1, "Q":2, "K":3, "T":4, "A":5}
         pointValues = {"9":0, "J":0, "Q":0, "K":1, "T":1, "A":1}
         for _ in range(self.num_decks):
-            for suit in suits:
-                for denomination in denominations:
+            for suit in self.suits:
+                for denomination in self.denominations:
                     strength = strengths[denomination]
                     pointValue = pointValues[denomination]
                     self.cards.append(Card(suit, denomination, strength, pointValue))
@@ -168,8 +186,12 @@ class Deck:
     def __len__(self) -> int:
         return len(self.cards)
 
+    def __getitem__(self, position):
+        return self.cards[position]
+
 class Player:
     def __init__(self, name="") -> None:
+        #TODO Show hand as hand.sort() in show_hand
         self.hand = []
         self.name = name
     
@@ -191,7 +213,11 @@ class Player:
     
     # NOTE Should this be split into self.cards.play and self.cards.discard?
     def remove_card_from_hand(self, card):
-        return self.cards.pop(card) 
+        return self.hand.pop(self.hand.index(card))
+
+    def discard(self, card):
+        pass
+
 
     def play_card(self, card):
         #TODO Figure out table space
@@ -217,3 +243,28 @@ p2 = Player('Player 2')
 p3 = Player('Player 3')
 p4 = Player('Player 4')
 players = [p1, p2, p3, p4]
+game.deal()
+a = p1.hand[0]
+
+def _sortTest(card):
+    _tmp_suits = Deck.suits.copy()
+    # Handle initial shuffle.  
+    # NOTE Should this be made static?
+    game.lead_suit = \
+        game.lead_suit if game.lead_suit != None else random.choice(_tmp_suits)
+    game.trump_suit = \
+        game.trump_suit if game.trump_suit != None else random.choice(_tmp_suits)
+    dv = {value: index+1 for index, value in enumerate(Deck.denominations)}
+    sv = []
+    sv.insert(0, _tmp_suits.pop(_tmp_suits.index(game.lead_suit)))
+    sv.insert(0, _tmp_suits.pop(_tmp_suits.index(game.trump_suit)))
+    #print(f'{sv = },\t{dv = }')
+    sv.extend(_tmp_suits)
+    #print(f'{sv = },\t{dv = }')
+    return None
+
+# TODO Should this go in the Game class?
+SPADES   =  "♠"
+HEARTS   =  "♥"
+DIAMONDS =  "♦"
+CLUBS    =  "♣"
