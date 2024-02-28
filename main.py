@@ -120,7 +120,7 @@ class Game:
 
 class Deck:
     denominations = ["9", "J", "Q", "K", "T", "A"] # NOTE used T for 10
-    suits = ["♠", "♥", "♦", "♣"] # Digraph is cC cD cH cS
+    suits = ["♦", "♣", "♥", "♠"] # Digraph is cC cD cH cS
 
     def __init__(self, num_decks=3) -> None:
         self.num_decks = num_decks
@@ -222,6 +222,9 @@ class Player:
     def play_card(self, card):
         #TODO Figure out table space
         pass
+
+    def show_hand(self):
+        return sorted(self.hand)
 
 if __name__ == "__main__":
     #print(rules)
