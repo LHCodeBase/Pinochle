@@ -74,20 +74,18 @@ class Card:
     def suit(self):
         return self.suit
 
-    def calculate_suit_value(self):
-        _denominations_value = {value: index+1 for index, value in \
-                enumerate(Deck.denominations)}
-        _temp_suits = Deck.suits.copy()
-        _suits_value.insert(Deck.suits.copy())
-        pass
-
     def __lt__(self, other):
         #return str(self) > str(other)
-        return str(Deck.suits.index(self.suit)) + str(self.strength) <  \
-                str(Deck.suits.index(other.suit)) + str(other.strength)
+        if game.trump_suit != None:
+            _suits = Deck.suits[Deck.suits.index(game.trump_suit):] + \
+                    Deck.suits[:Deck.suits.index(game.trump_suit)]
+        else:
+            _suits = Deck.suits.copy()
+        return str(_suits.index(self.suit)) + str(self.strength) <  \
+                str(_suits.index(other.suit)) + str(other.strength)
     def __eq__(self, other):
-        return str(Deck.suits.index(self.suit)) + str(self.strength) ==  \
-                str(Deck.suits.index(other.suit)) + str(other.strength)
+        return str(_suits.index(self.suit)) + str(self.strength) ==  \
+                str(_suits.index(other.suit)) + str(other.strength)
 
 
     
@@ -97,11 +95,12 @@ class Game:
     def __init__(self, num_players=4) -> None:
         self.deck = Deck()
         self.players = [Player(f'Player {i+1}') for i in range(num_players)]
+        # NOTE If number of players is below 4, add Bot to prevent bugs
         self.current_bid = 41
         self.kitty = []
         self.trump_suit = None
         self.lead_suit = None
-        self.dealer_button = self.players[0]
+        self.dealer = self.players[0]
 
 
     def play(self):
@@ -115,12 +114,12 @@ class Game:
         self.kitty.extend(\
             [self.deck.cards.pop(0) for i in range(len(self.deck.cards))])
 
-    def change_dealer(self, current_dealer):
-        current_dealer_index = players.index(current_dealer)
-        if players[current_dealer_index] != players[-1]:
-            self.dealer_button = players[current_dealer_index+1]
+    def change_dealer(self):
+        current_dealer_index = self.players.index(self.dealer)
+        if self.players[current_dealer_index] != self.players[-1]:
+            self.dealer = self.players[current_dealer_index+1]
         else:
-            self.dealer_button = players[0]
+            self.dealer = players[0]
 
 class Deck:
     denominations = ["9", "J", "Q", "K", "T", "A"] # NOTE used T for 10
@@ -242,25 +241,27 @@ a = p1.hand[0]
 b = p1.hand[-1]
 
 def _sortTest(card):
+    # NOTE This may need to be split up into different fuctions
+    # one for initial hand, one as an option for after trump is called
+    # NOTE lead card is for calculating winning card
+    # NOTE This setup was not intended for player show_hand()
+
     _tmp_suits = Deck.suits.copy()
     # Handle initial shuffle.  
-    # NOTE Should this be made static?
+    # TODO Raalize that you made Card.strength and unclutter this 
     game.lead_suit = \
         game.lead_suit if game.lead_suit != None else random.choice(_tmp_suits)
     game.trump_suit = \
         game.trump_suit if game.trump_suit != None else random.choice(_tmp_suits)
-    denomination_value = \
-            {value: index+1 for index, value in enumerate(Deck.denominations)}
     suit_value = []
     suit_value.insert(0, _tmp_suits.pop(_tmp_suits.index(game.trump_suit)))
     try:
         suit_value.insert(0, _tmp_suits.pop(_tmp_suits.index(game.lead_suit)))
     except ValueError:
         pass
-    print(f'{suit_value = },\t{denomination_value = } \n')
-    suit_value.extend(_tmp_suits)
-    print(f'{suit_value = },\t{denomination_value = } \n')
-    return None
+    finally:
+        suit_value[0:0] = _tmp_suits # like extending the list at the beginning
+    return card.strength + (suit_value.index(card.suit) * 10)
 
 # TODO Should this go in the Game class?
 SPADES   =  "♠"
