@@ -85,6 +85,10 @@ class Card:
         #return str(self) > str(other)
         return str(Deck.suits.index(self.suit)) + str(self.strength) <  \
                 str(Deck.suits.index(other.suit)) + str(other.strength)
+    def __eq__(self, other):
+        return str(Deck.suits.index(self.suit)) + str(self.strength) ==  \
+                str(Deck.suits.index(other.suit)) + str(other.strength)
+
 
     
 # TODO: Make deck part of Game class and initialize on start.
@@ -161,19 +165,6 @@ class Deck:
         else:
             print("All cards dealt") 
 
-#def spades_high(card):
-#    rank_value = FrenchDeck.ranks.index(card.rank) #returns rank index, not rank
-#    return rank_value * len(suit_values) + suit_values[card.suit]
-    # First entry is Card(rank='2', suit='clubs')
-    # index of 2 is 0.  0 * 4 = 0. suit_values['clubs'] = 0
-    # this puts it at sorting 0
-
-#for card in sorted(deck, key=spades_high):
-#    print(card)
-#                                       OR
-#pprint(sorted(deck, key=spades_high))
-
-
     def __repr__(self) -> str:
         """`deck` returns card string"""
         return ' '.join(str(card) for card in self.cards)
@@ -248,6 +239,7 @@ p4 = Player('Player 4')
 players = [p1, p2, p3, p4]
 game.deal()
 a = p1.hand[0]
+b = p1.hand[-1]
 
 def _sortTest(card):
     _tmp_suits = Deck.suits.copy()
@@ -257,13 +249,17 @@ def _sortTest(card):
         game.lead_suit if game.lead_suit != None else random.choice(_tmp_suits)
     game.trump_suit = \
         game.trump_suit if game.trump_suit != None else random.choice(_tmp_suits)
-    dv = {value: index+1 for index, value in enumerate(Deck.denominations)}
-    sv = []
-    sv.insert(0, _tmp_suits.pop(_tmp_suits.index(game.lead_suit)))
-    sv.insert(0, _tmp_suits.pop(_tmp_suits.index(game.trump_suit)))
-    #print(f'{sv = },\t{dv = }')
-    sv.extend(_tmp_suits)
-    #print(f'{sv = },\t{dv = }')
+    denomination_value = \
+            {value: index+1 for index, value in enumerate(Deck.denominations)}
+    suit_value = []
+    suit_value.insert(0, _tmp_suits.pop(_tmp_suits.index(game.trump_suit)))
+    try:
+        suit_value.insert(0, _tmp_suits.pop(_tmp_suits.index(game.lead_suit)))
+    except ValueError:
+        pass
+    print(f'{suit_value = },\t{denomination_value = } \n')
+    suit_value.extend(_tmp_suits)
+    print(f'{suit_value = },\t{denomination_value = } \n')
     return None
 
 # TODO Should this go in the Game class?
