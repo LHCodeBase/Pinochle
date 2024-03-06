@@ -96,12 +96,27 @@ class Game:
         self.deck = Deck()
         self.players = [Player(f'Player {i+1}') for i in range(num_players)]
         # NOTE If number of players is below 4, add Bot to prevent bugs
+        # Or just leave it as is and figure out a system for AI players?
         self.current_bid = 41
+        self.bid_winner = None
+        #TODO Add game.bid_winner assignment 
         self.kitty = []
         self.trump_suit = None
         self.lead_suit = None
         self.dealer = self.players[0]
+        # NOTE Should this be a defined method with players and points?  Or part
+        # of the Player class?
+        self.team1 = self.players[0::2]
+        self.team2 = self.players[1::2]
 
+    # __getitem__(self, key) is used to evaluate self[key]
+    # calling my_obj[key] will evaluate my_obj.__getitem__(key)
+    # NOTE use Game[player_name] and NOT Game.players[]
+    def __getitem__(self, player_name):
+        for player in self.players:
+            if player.name == player_name:
+                return player
+        raise KeyError(f"No player with the name '{player_name}'")
 
     def play(self):
         pass
@@ -120,6 +135,9 @@ class Game:
             self.dealer = self.players[current_dealer_index+1]
         else:
             self.dealer = players[0]
+
+    def score(self, team) -> int:
+        pass
 
 class Deck:
     denominations = ["9", "J", "Q", "K", "T", "A"] # NOTE used T for 10
@@ -184,6 +202,7 @@ class Player:
         #TODO Show hand as hand.sort() in show_hand
         self.hand = []
         self.name = name
+        self._score = 0 # Use as current hand score, not total score
     
     def __repr__(self) -> str:
         return self.name
@@ -215,6 +234,7 @@ class Player:
 
     def show_hand(self):
         return sorted(self.hand)
+
 
 if __name__ == "__main__":
     #print(rules)
@@ -268,3 +288,5 @@ SPADES   =  "♠"
 HEARTS   =  "♥"
 DIAMONDS =  "♦"
 CLUBS    =  "♣"
+
+
