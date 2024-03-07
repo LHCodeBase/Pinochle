@@ -42,7 +42,35 @@ rules = """
 def get_player_count():
     keep_going = [str(range(4))]
     num_players = input('How many players? Press \'q\' to (q)uit' )
+    # TODO fix this or delete it
     #match
+    pass
+
+meld_rules = """
+    run      	    A-10-K-Q-J of trump 	                        15
+    aces 	        four aces, one of each suit 	                10
+    kings       	four kings, one of each suit 	                8
+    queens 	        four queens, one of each suit 	                6
+    jacks 	        four jacks, one of each suit 	                4
+    pinochle     	queen of spades and jack of diamonds 	        4
+    double pinochle queen of spades and jack of diamonds 	        30
+    triple pinochle queen of spades and jack of diamonds 	        60
+    royal marriage 	K-Q of trump (unless in a run)* 	            4
+    common marriage	K-Q of nontrump suit                            2
+    dix 	        9 of trump 	                                    1
+    double run 	    both sequences A-10-K-Q-J of trump 	            40
+    double aces 	two aces of every suit                        	100
+    double kings 	two kings of every suit                        	80
+    double queens 	two queens of every suit                        60
+    double jacks 	two jacks of every suit                         40
+    double pinochle	two queens of spades and jacks of diamonds 	    30 
+    triple aces 	three aces of every suit                       	150
+    triple kings 	three kings of every suit                      	120
+    triple queens 	three queens of every suit                      90
+    triple jacks 	three jacks of every suit                       60
+    triple pinochle	three queens of spades and jacks of diamonds 	60 
+    # NOTE that a run should not also include to points of a marriage
+"""
 
 class Card:
     def __init__(self, suit, denomination, strength, pointValue) -> None:
@@ -256,6 +284,7 @@ p2 = Player('Player 2')
 p3 = Player('Player 3')
 p4 = Player('Player 4')
 players = [p1, p2, p3, p4]
+<<<<<<< HEAD
 game.deal()
 a = p1.hand[0]
 b = p1.hand[-1]
