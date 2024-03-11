@@ -203,6 +203,7 @@ class Deck:
             return None
     
     def deal_kitty(self):
+        """4 cards that are bid on"""
         if len(self.cards) > 4:
             print(f"Can't add to the kitty - {len(self.cards)} in deck.")
         elif len(self.cards) <= 4 and len(self.cards) > 0:
@@ -249,18 +250,16 @@ class Player:
             print(f"add_card_to_hand failure - type {type(card)}")
     
     # NOTE Should this be split into self.cards.play and self.cards.discard?
-    def remove_card_from_hand(self, card):
-        return self.hand.pop(self.hand.index(card))
-
     def discard(self, card):
-        pass
-
+        """Discard after winning the kitty"""
+        return self.hand.pop(self.hand.index(card))
 
     def play_card(self, card):
         #TODO Figure out table space
         pass
 
     def show_hand(self):
+        """Show the player their hand"""
         return sorted(self.hand)
 
 
@@ -284,7 +283,6 @@ p2 = Player('Player 2')
 p3 = Player('Player 3')
 p4 = Player('Player 4')
 players = [p1, p2, p3, p4]
-<<<<<<< HEAD
 game.deal()
 a = p1.hand[0]
 b = p1.hand[-1]
