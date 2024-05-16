@@ -2,7 +2,7 @@
 
 import random
 
-rules = """ 
+game_rules = """ 
     This is a deck and a half Pinochle card game.
     There are 4 players in teams of two.
     There is a kitty that comes with a winning bid which consists of 4 cards. 
@@ -39,13 +39,6 @@ rules = """
      that won the bid wins the game.
     """
 
-def get_player_count():
-    keep_going = [str(range(4))]
-    num_players = input('How many players? Press \'q\' to (q)uit' )
-    # TODO fix this or delete it
-    #match
-    pass
-
 meld_rules = """
     run      	    A-10-K-Q-J of trump 	                        15
     aces 	        four aces, one of each suit 	                10
@@ -73,13 +66,13 @@ meld_rules = """
 """
 
 class Card:
-    def __init__(self, suit, denomination, strength, pointValue) -> None:
+    def __init__(self: 'Card', suit: str, denomination: str, strength: int, pointValue: int) -> None:
         self.suit = suit
         self.denomination = denomination
         self.strength = strength
         self.pointValue = pointValue
 
-    def __str__(self) -> str:
+    def __str__(self: 'Card') -> str:
         # NOTE ANSI escape char (\033) does NOT count towards string length
         terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else \
                 ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
@@ -87,22 +80,22 @@ class Card:
         # str(Card)[10:12] gives the denomination and suit as one string
         # `d, s = str(Card)[10:12]` gives the denomination and suit seperately
 
-    def __repr__(self) -> str:
+    def __repr__(self: 'Card') -> str:
         # NOTE ANSI escape char (\033) does NOT count towards string length
         terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else \
                 ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
         return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
     
-    def value(self):
+    def value(self: 'Card') -> int:
         return int(self.pointValue)
      
-    def strength(self):
+    def strength(self: 'Card') -> int:
         return int(self.strength)
 
-    def suit(self):
+    def suit(self: 'Card') -> str:
         return self.suit
 
-    def __lt__(self, other):
+    def __lt__(self: 'Card', other: 'Card') -> int:
         #return str(self) > str(other)
         if game.trump_suit != None:
             _suits = Deck.suits[Deck.suits.index(game.trump_suit):] + \
@@ -111,72 +104,116 @@ class Card:
             _suits = Deck.suits.copy()
         return str(_suits.index(self.suit)) + str(self.strength) <  \
                 str(_suits.index(other.suit)) + str(other.strength)
-    def __eq__(self, other):
+
+    def __eq__(self: 'Card', other: 'Card') -> bool:
+        if game.trump_suit != None:
+            _suits = Deck.suits[Deck.suits.index(game.trump_suit):] + \
+                    Deck.suits[:Deck.suits.index(game.trump_suit)]
+        else:
+            _suits = Deck.suits.copy()
         return str(_suits.index(self.suit)) + str(self.strength) ==  \
                 str(_suits.index(other.suit)) + str(other.strength)
-
 
     
 # TODO: Make deck part of Game class and initialize on start.
 # TODO: Make shuffle part of a new hand method.
 class Game:
-    def __init__(self, num_players=4) -> None:
+    def __init__(self: 'Game', num_players: int=4) -> int -> None:
         self.deck = Deck()
         self.players = [Player(f'Player {i+1}') for i in range(num_players)]
         # NOTE If number of players is below 4, add Bot to prevent bugs
         # Or just leave it as is and figure out a system for AI players?
-        self.current_bid = 41
+        self.current_bid = 40
         self.bid_winner = None
         #TODO Add game.bid_winner assignment 
         self.kitty = []
         self.trump_suit = None
         self.lead_suit = None
-        self.dealer = self.players[0]
+        self.dealer = self.players[-1] # new hand changes dealer first
+        self.current_player = self.dealer
         # NOTE Should this be a defined method with players and points?  Or part
         # of the Player class?
         self.team1 = self.players[0::2]
         self.team2 = self.players[1::2]
-
+        self.t1_score = 0
+        self.t2_score = 0
     # __getitem__(self, key) is used to evaluate self[key]
     # calling my_obj[key] will evaluate my_obj.__getitem__(key)
     # NOTE use Game[player_name] and NOT Game.players[]
-    def __getitem__(self, player_name):
+    def __getitem__(self: 'Game', player_name: str) -> str:
         for player in self.players:
             if player.name == player_name:
                 return player
         raise KeyError(f"No player with the name '{player_name}'")
 
-    def play(self):
-        pass
+    def new_hand(self: 'Game') -> None:
+        """A round consists of six phases: dealing, bidding, exchanging, melding
+        trick taking, and scoring"""
+        # Switch dealer # Initial dealer set to player 4
+        self.change_dealer()
+        # shuffle and deal cards
+        self.deal()  
+        # start bidding
+        # bid winner or throw in hand
+            # if bid winner, add kitty and discard
+                # play round until no more cards
+            # if throw in hand, new hand
 
-    def deal(self):
+
+    def deal(self: 'Game') -> None:
+        self.kitty = []
         self.deck.shuffle()
         while len(self.deck.cards) > 4:
             for player in players:
                 player.hand.append(self.deck.cards.pop(0))
         self.kitty.extend(\
             [self.deck.cards.pop(0) for i in range(len(self.deck.cards))])
+        for player in players:
+            player.hand.sort()
 
-    def change_dealer(self):
+    def change_dealer(self: 'Game') -> None:
         current_dealer_index = self.players.index(self.dealer)
-        if self.players[current_dealer_index] != self.players[-1]:
-            self.dealer = self.players[current_dealer_index+1]
-        else:
-            self.dealer = players[0]
+        self.dealer = self.players[(current_dealer_index+1) % len(self.players)]
+#        if self.players[current_dealer_index] != self.players[-1]:
+#            self.dealer = self.players[current_dealer_index+1]
+#        else:
+#            self.dealer = players[0]
 
-    def score(self, team) -> int:
+    def score(self: 'Game') -> int:
+        self.t1_score += sum(player.score for player in self.team1)
+        self.t2_score += sum(player.score for player in self.team2)
+        print(f"{self.team1 = }, scores is: \n") # add right just space filled score  
+        print(f"{self.team2 = }, scores is: \n") # add right just space filled score  
         pass
+
+    def start_bidding(self: 'Game') -> None:
+        keep_going = True
+        print(f"{self.dealer} dealt, {self.current_player} will start the bidding") 
+        #TODO ensure that self.bid_winner is reset to None after round ends
+        while keep_going:
+            # This is a mess
+            # we need to ask the player, get an answer and do something with the answer:w
+            
+            self.current_player.bid()
+
+    def next_player(self: 'Game') -> None:
+        current_player_index = self.players.index(self.current_player)
+        self.current_player = self.players[(current_dealer_index+1) % len(self.players)]
+
+    def play(self: 'Game') -> None:
+        pass
+
 
 class Deck:
     denominations = ["9", "J", "Q", "K", "T", "A"] # NOTE used T for 10
     suits = ["♦", "♣", "♥", "♠"] # Digraph is cC cD cH cS
 
-    def __init__(self, num_decks=3) -> None:
+    def __init__(self: 'Deck', num_decks=3) -> None:
         self.num_decks = num_decks
         self.cards = []
         self.create_deck()
     
-    def create_deck(self):
+    def create_deck(self: 'Deck') -> None:
         # TODO Add terminal colors - red and black - with background white
         strengths = {"9":0, "J":1, "Q":2, "K":3, "T":4, "A":5}
         pointValues = {"9":0, "J":0, "Q":0, "K":1, "T":1, "A":1}
@@ -188,12 +225,12 @@ class Deck:
                     self.cards.append(Card(suit, denomination, strength, pointValue))
 
     # Note that this doesn't reset the deck
-    def shuffle(self):
+    def shuffle(self: 'Deck') -> None:
         for t in range(5):
             random.shuffle(self.cards)
     
     
-    def deal_card(self):
+    def deal_card(self: 'Deck') -> None:
         #TODO Make deal stop with 4 cards without messing things up
 
         if len(self.cards) > 4:
@@ -202,7 +239,7 @@ class Deck:
             print("Cards are dealt, 4 left in the kitty.")
             return None
     
-    def deal_kitty(self):
+    def deal_kitty(self: 'Deck') -> None:
         """4 cards that are bid on"""
         if len(self.cards) > 4:
             print(f"Can't add to the kitty - {len(self.cards)} in deck.")
@@ -211,29 +248,29 @@ class Deck:
         else:
             print("All cards dealt") 
 
-    def __repr__(self) -> str:
+    def __repr__(self: 'Deck') -> str:
         """`deck` returns card string"""
         return ' '.join(str(card) for card in self.cards)
 
 
-    def __str__(self) -> str:
+    def __str__(self: 'Deck') -> str:
         """`deck.cards` returns list of card strings"""
         return ', '.join(str(card) for card in self.cards)
 
-    def __len__(self) -> int:
+    def __len__(self: 'Deck') -> int:
         return len(self.cards)
 
-    def __getitem__(self, position):
+    def __getitem__(self: 'Deck', position: int) -> str:
         return self.cards[position]
 
 class Player:
-    def __init__(self, name="") -> None:
+    def __init__(self: 'Player', name: str ="") -> None:
         #TODO Show hand as hand.sort() in show_hand
         self.hand = []
         self.name = name
-        self._score = 0 # Use as current hand score, not total score
+        self.score = 0 # Use as current hand score, not total score
     
-    def __repr__(self) -> str:
+    def __repr__(self: 'Player') -> str:
         return self.name
 
     # NOTE:
@@ -241,7 +278,7 @@ class Player:
     # p1 = Player(p1)
     # p1.name >>> 'Player 1'
     
-    def add_card_to_hand(self, card):
+    def add_card_to_hand(self: 'Player', card: 'Card') -> None:
         if isinstance(card, Card):
             self.hand.append(card)
         elif isinstance(card, list):
@@ -250,21 +287,52 @@ class Player:
             print(f"add_card_to_hand failure - type {type(card)}")
     
     # NOTE Should this be split into self.cards.play and self.cards.discard?
-    def discard(self, card):
+    def discard(self: 'Player', card: 'Card') -> None:
         """Discard after winning the kitty"""
         return self.hand.pop(self.hand.index(card))
 
-    def play_card(self, card):
+    def _is_suit_playable(self: 'Player', card: 'Card') -> None:
+        if game.lead_suit == None:
+            return True
+        if game.lead_suit == game.trump_suit: #and #TODO add current round winning card
+            pass
+        # TODO
+         
+
+    def play_card(self: 'Player', card: 'Card') -> None:
+        # TODO create check if card is playable
+    
         #TODO Figure out table space
+
+
+        # Check that player has card
+        # select card
+        # remove card from hand
+        # Tell the table that player played card / put on table
+        # return card?
+
+
         pass
 
-    def show_hand(self):
+    def bid(self: 'Card') -> None:
+        ans = input(f"Please enter {Game.current_bid + 1} or higher, or press [P/p/0] to pass")
+        if ans.lower == 'p' or ans == '0':
+            return 0
+        elif int(ans) > Game.current_bid:
+            return int(ans)
+        elif int(ans) <= Game.current_bid:
+            print("Your bid must be higher than the current bid")
+            self.bid()
+        else:
+            self.bid()
+
+    def show_hand(self: 'Card') -> list:
         """Show the player their hand"""
         return sorted(self.hand)
 
 
 if __name__ == "__main__":
-    #print(rules)
+    #print(game_rules)
     deck = Deck()
     game = Game()
 
@@ -278,6 +346,7 @@ if __name__ == "__main__":
 # TODO: 
 
 # NOTE TESTING
+# NOTE Could this be created in the new game without making it directly a game object
 p1 = Player('Player 1')
 p2 = Player('Player 2')
 p3 = Player('Player 3')
