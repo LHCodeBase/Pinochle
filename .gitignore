@@ -2,3 +2,4 @@ tags
 .env
 .venv
 *.orig
+curses_test.py
