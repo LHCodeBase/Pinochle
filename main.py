@@ -73,6 +73,9 @@ class Card:
         self.pointValue = pointValue
 
     def __str__(self: 'Card') -> str:
+        return f"{self.denomination}{self.suit}"
+
+    def name(self: 'Card') -> str:
         # NOTE ANSI escape char (\033) does NOT count towards string length
         terminal_colors = "\033[30m\033[47m" if self.suit in ["♣", "♠"] else \
                 ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
@@ -118,7 +121,7 @@ class Card:
 # TODO: Make deck part of Game class and initialize on start.
 # TODO: Make shuffle part of a new hand method.
 class Game:
-    def __init__(self: 'Game', num_players: int=4) -> int -> None:
+    def __init__(self: 'Game', num_players: int=4) -> None:
         self.deck = Deck()
         self.players = [Player(f'Player {i+1}') for i in range(num_players)]
         # NOTE If number of players is below 4, add Bot to prevent bugs
@@ -140,6 +143,7 @@ class Game:
     # __getitem__(self, key) is used to evaluate self[key]
     # calling my_obj[key] will evaluate my_obj.__getitem__(key)
     # NOTE use Game[player_name] and NOT Game.players[]
+
     def __getitem__(self: 'Game', player_name: str) -> str:
         for player in self.players:
             if player.name == player_name:
@@ -187,6 +191,8 @@ class Game:
         pass
 
     def start_bidding(self: 'Game') -> None:
+        if self.dealer == self.current_player:
+            self.change_dealer()
         keep_going = True
         print(f"{self.dealer} dealt, {self.current_player} will start the bidding") 
         #TODO ensure that self.bid_winner is reset to None after round ends
@@ -314,7 +320,7 @@ class Player:
 
         pass
 
-    def bid(self: 'Card') -> None:
+    def bid(self: 'Player') -> None:
         ans = input(f"Please enter {Game.current_bid + 1} or higher, or press [P/p/0] to pass")
         if ans.lower == 'p' or ans == '0':
             return 0
@@ -326,7 +332,7 @@ class Player:
         else:
             self.bid()
 
-    def show_hand(self: 'Card') -> list:
+    def show_hand(self: 'Player') -> list:
         """Show the player their hand"""
         return sorted(self.hand)
 
