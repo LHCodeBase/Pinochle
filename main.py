@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import pdb
 import random
 
 game_rules = """ 
@@ -66,6 +67,10 @@ meld_rules = """
 """
 
 class Card:
+
+    DENOMINATIONS = ["9", "J", "Q", "K", "T", "A"] # NOTE used T for 10
+    SUITS = ["♦", "♣", "♥", "♠"] # Digraph is cC cD cH cS
+
     def __init__(self: 'Card', suit: str, denomination: str, strength: int, pointValue: int) -> None:
         self.suit = suit
         self.denomination = denomination
@@ -89,6 +94,32 @@ class Card:
                 ("\033[31m\033[47m" if self.suit in ["♦", "♥"] else "\033[30m")
         return f"{terminal_colors}{self.denomination}{self.suit}\033[0m"
     
+    def _compare(self: 'Card', other: 'Card', trump_suit: str = None) -> str:
+        # Note: We don't need a lead_suit passed in, as the lead suit will not compare 
+        #   against anything, and the high card will either be lead suit or trump suit
+        # TODO make sure there is a top card or winning card that can be passed as "other"
+        #self_suit_i = 
+        if trump_suit == None:
+            if game.trump_suit != None:
+                trump_suit = game.trump_suit
+        if other.suit == trump_suit:
+            if self.suit != trump_suit:
+                return 'lt'
+            if self.strength > other.strength:
+                return 'gt'
+            return 'lt'
+        if self.suit == trump_suit:
+            return 'gt'
+        if self.suit != other.suit:
+            return 'lt'
+        if self.strength > other.strength:
+            return 'gt'
+        if self.name == other.name:
+            return 'eq'
+        return 'lt'
+
+
+
     def value(self: 'Card') -> int:
         return int(self.pointValue)
      
@@ -98,24 +129,29 @@ class Card:
     def suit(self: 'Card') -> str:
         return self.suit
 
+    def __gt__(self: 'Card', other: 'Card') -> int:
+        return self._compare(other) == 'gt'
+    
     def __lt__(self: 'Card', other: 'Card') -> int:
+        return self._compare(other) == 'lt'
         #return str(self) > str(other)
-        if game.trump_suit != None:
-            _suits = Deck.suits[Deck.suits.index(game.trump_suit):] + \
-                    Deck.suits[:Deck.suits.index(game.trump_suit)]
-        else:
-            _suits = Deck.suits.copy()
-        return str(_suits.index(self.suit)) + str(self.strength) <  \
-                str(_suits.index(other.suit)) + str(other.strength)
+#        if game.trump_suit != None:
+#            _suits = Deck.suits.copy()
+#        else:
+#            _suits = Deck.suits.copy()[Deck.suits.index(game.trump_suit):] + \
+#                    Deck.suits.copy()[:Deck.suits.index(game.trump_suit)]
+#        return str(_suits.index(self.suit)) + str(self.strength) <  \
+#                str(_suits.index(other.suit)) + str(other.strength)
 
     def __eq__(self: 'Card', other: 'Card') -> bool:
-        if game.trump_suit != None:
-            _suits = Deck.suits[Deck.suits.index(game.trump_suit):] + \
-                    Deck.suits[:Deck.suits.index(game.trump_suit)]
-        else:
-            _suits = Deck.suits.copy()
-        return str(_suits.index(self.suit)) + str(self.strength) ==  \
-                str(_suits.index(other.suit)) + str(other.strength)
+        return self._compare(other) == 'eq'
+#        if game.trump_suit != None:
+#            _suits = Deck.suits[Deck.suits.index(game.trump_suit):] + \
+#                    Deck.suits[:Deck.suits.index(game.trump_suit)]
+#        else:
+#            _suits = Deck.suits.copy()
+#        return str(_suits.index(self.suit)) + str(self.strength) ==  \
+#                str(_suits.index(other.suit)) + str(other.strength)
 
     
 # TODO: Make deck part of Game class and initialize on start.
@@ -168,7 +204,7 @@ class Game:
         self.kitty = []
         self.deck.shuffle()
         while len(self.deck.cards) > 4:
-            for player in players:
+            for player in self.players:
                 player.hand.append(self.deck.cards.pop(0))
         self.kitty.extend(\
             [self.deck.cards.pop(0) for i in range(len(self.deck.cards))])
@@ -206,7 +242,19 @@ class Game:
         current_player_index = self.players.index(self.current_player)
         self.current_player = self.players[(current_dealer_index+1) % len(self.players)]
 
+    def _show_hands(self: 'Game') -> list[list]:
+        for player in self.players:
+            print(player.show_hand())
+
+
     def play(self: 'Game') -> None:
+        # deal
+        self.new_hand()
+        # bid
+        # name trump
+        # meld
+        # discard
+        # while cards, play hand
         pass
 
 
@@ -358,7 +406,8 @@ p2 = Player('Player 2')
 p3 = Player('Player 3')
 p4 = Player('Player 4')
 players = [p1, p2, p3, p4]
-game.deal()
+#game.deal()
+game.play()
 a = p1.hand[0]
 b = p1.hand[-1]
 
