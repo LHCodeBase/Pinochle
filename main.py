@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import pdb
 import random
 
 game_rules = """ 
@@ -156,6 +155,39 @@ class Card:
     
 # TODO: Make deck part of Game class and initialize on start.
 # TODO: Make shuffle part of a new hand method.
+
+def sort_key(card):
+    trump_suit = game.trump_suit if game.trump_suit else SPADES
+    # Mapping suits to colors (assuming red and black suits)
+    suit_colors = {"♦": "red", "♥": "red", "♣": "black", "♠": "black"}
+    # Assigning a priority number to each suit based on trump settings
+    if card.suit == trump_suit:
+        suit_priority = 4  # Highest priority
+    elif suit_colors[card.suit] == suit_colors[trump_suit]:
+        suit_priority = 3  # Second highest if same color
+    else:
+        suit_priority = 1  # Lowest priority if different color
+
+    # Find the denomination index for the card's strength
+    denominations = ["9", "J", "Q", "K", "T", "A"]
+    strength = denominations.index(card.strength)
+
+    return (suit_priority, strength)
+
+## Example usage with a list of card objects and a trump suit
+#cards = [
+#    {"suit": "♦", "strength": "A"},
+#    {"suit": "♠", "strength": "9"},
+#    {"suit": "♠", "strength": "K"},
+#    {"suit": "♥", "strength": "Q"},
+#    {"suit": "♣", "strength": "T"}
+#]
+#
+#trump_suit = "♠"  # Example trump suit
+#cards.sort(key=lambda card: sort_key(card, trump_suit))
+
+
+
 class Game:
     def __init__(self: 'Game', num_players: int=4) -> None:
         self.deck = Deck()
@@ -227,6 +259,7 @@ class Game:
         pass
 
     def start_bidding(self: 'Game') -> None:
+        players_still_in = game.players.copy()
         if self.dealer == self.current_player:
             self.change_dealer()
         keep_going = True
@@ -240,16 +273,21 @@ class Game:
 
     def next_player(self: 'Game') -> None:
         current_player_index = self.players.index(self.current_player)
-        self.current_player = self.players[(current_dealer_index+1) % len(self.players)]
+        self.current_player = self.players[(current_player_index+1) % len(self.players)]
 
     def _show_hands(self: 'Game') -> list[list]:
         for player in self.players:
-            print(player.show_hand())
+            print(sorted(player.show_hand(), key=_sortTest))
 
 
     def play(self: 'Game') -> None:
         # deal
+        print("  Dealing a new hand  ".center(50,'='))
         self.new_hand()
+        game.current_player = game.dealer
+        game.next_player()
+        game.current_player.bid()
+        
         # bid
         # name trump
         # meld
@@ -369,12 +407,17 @@ class Player:
         pass
 
     def bid(self: 'Player') -> None:
-        ans = input(f"Please enter {Game.current_bid + 1} or higher, or press [P/p/0] to pass")
-        if ans.lower == 'p' or ans == '0':
+        print(f"{self.name} is up:\n")
+        print(self.show_hand())
+        ans = input(f"Please enter {game.current_bid + 1} or higher, or press [P/p/0] to pass :\n\t")
+        if ans.lower() == 'p' or ans == '0' or ans == '' or ans.lower() == "pass":
             return 0
-        elif int(ans) > Game.current_bid:
+        elif not ans.isdigit():
+            print(f"{ans} is not a valid entry.")
+            ans = input(f"Please enter {game.current_bid + 1} or higher, or press [P/p/0] to pass :\n\t")
+        elif int(ans) > game.current_bid:
             return int(ans)
-        elif int(ans) <= Game.current_bid:
+        elif int(ans) <= game.current_bid:
             print("Your bid must be higher than the current bid")
             self.bid()
         else:
@@ -401,38 +444,46 @@ if __name__ == "__main__":
 
 # NOTE TESTING
 # NOTE Could this be created in the new game without making it directly a game object
-p1 = Player('Player 1')
-p2 = Player('Player 2')
-p3 = Player('Player 3')
-p4 = Player('Player 4')
+p1 = game.players[0]
+p2 = game.players[1]
+p3 = game.players[2]
+p4 = game.players[3]
 players = [p1, p2, p3, p4]
 #game.deal()
 game.play()
 a = p1.hand[0]
 b = p1.hand[-1]
 
-def _sortTest(card):
-    # NOTE This may need to be split up into different fuctions
-    # one for initial hand, one as an option for after trump is called
-    # NOTE lead card is for calculating winning card
-    # NOTE This setup was not intended for player show_hand()
+def generate_alternate_color(suit: str) -> list:
+    if suit in ["♣", "♠"]:
+        return random.choice(["♦", "♥"])
+    elif suit in ["♦", "♥"]:
+        return random.choice(["♣", "♠"])
 
-    _tmp_suits = Deck.suits.copy()
-    # Handle initial shuffle.  
-    # TODO Raalize that you made Card.strength and unclutter this 
-    game.lead_suit = \
-        game.lead_suit if game.lead_suit != None else random.choice(_tmp_suits)
-    game.trump_suit = \
-        game.trump_suit if game.trump_suit != None else random.choice(_tmp_suits)
-    suit_value = []
-    suit_value.insert(0, _tmp_suits.pop(_tmp_suits.index(game.trump_suit)))
-    try:
-        suit_value.insert(0, _tmp_suits.pop(_tmp_suits.index(game.lead_suit)))
-    except ValueError:
-        pass
-    finally:
-        suit_value[0:0] = _tmp_suits # like extending the list at the beginning
-    return card.strength + (suit_value.index(card.suit) * 10)
+def check_alternate_color(suit: str) -> list:
+    if isinstance(suit, Card):
+        suit = suit.suit
+    if suit in ["♣", "♠"]:
+        return ["♦", "♥"]
+    elif suit in ["♦", "♥"]:
+        return ["♣", "♠"]
+
+
+def _sortTest(card):
+    # NOTE lead card is for calculating winning card
+        # No longer needed with game._compare()
+    # NOTE This setup was not intended for player show_hand()
+    _tmp_suits = [DIAMONDS, CLUBS, HEARTS, SPADES]
+    # TODO Realize that you made Card.strength and unclutter this 
+    if game.trump_suit == None or game.trump_suit == SPADES:
+        suit_value = _tmp_suits
+    elif game.trump_suit == HEARTS:
+        suit_value = [SPADES, DIAMONDS, CLUBS, HEARTS]
+    elif game.trump_suit == CLUBS:
+        suit_value = [HEARTS, SPADES, DIAMONDS, CLUBS]
+    elif game.trump_suit == DIAMONDS:
+        suit_value = [CLUBS, HEARTS, SPADES, DIAMONDS]
+        return card.strength + (suit_value.index(card.suit) * 10)
 
 # TODO Should this go in the Game class?
 SPADES   =  "♠"
